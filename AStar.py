@@ -25,6 +25,9 @@ class state:
     def toString(self):
         print(''.join(self.state))
 
+    def __lt__(self,other):
+        return self.state < other.state
+
 def manhattan_distance(state:state,goal:state):
     tiles_start = [Tiles(i,state.state[i]) for i in range(9)]
     tiles_end = [Tiles(i,goal.state[i]) for i in range(9)]
@@ -39,7 +42,31 @@ def manhattan_distance(state:state,goal:state):
 
     return tot_distance
 
+def euclidean_distance(state:state,goal:state):
+    tiles_start = [Tiles(i,state.state[i]) for i in range(9)]
+    tiles_end = [Tiles(i,goal.state[i]) for i in range(9)]
 
+    tiles_start.sort(key=lambda x:x.value)
+    tiles_end.sort(key=lambda x:x.value)
+
+    tot_distance = 0
+    for i in range(9):
+        distance = ((tiles_start[i].position[0] - tiles_end[i].position[0])**2 + (tiles_start[i].position[1] - tiles_end[i].position[1])**2)**0.5
+        tot_distance += distance
+
+    return tot_distance
+
+def traverse(state:state,steps=0):
+    if state != None:
+        steps+=1
+        traverse(state.parent,steps)
+        steps-=1
+        print(steps)
+        state.printState()
+    else:
+        print(steps-1)
+        return 
+    
 def AStar(start_state:state , goal_state:state,heuristic_fn):
     frontier = PriorityQueue()
     frontier.put((0,start_state))
@@ -50,31 +77,29 @@ def AStar(start_state:state , goal_state:state,heuristic_fn):
         return start_state
 
     while not frontier.empty():
-        parent_state = frontier.get()[1]
+        _,parent_state = frontier.get()        
         explored.append(parent_state)
         blank_index = parent_state.state.index("0")
         blank_row = blank_index//3
         blank_col = blank_index%3
         depth+=1
         children = []
-
-        if blank_col+1 <= 2:
+        
+        if blank_col+1 <= 2:                        
             child = state(parent_state.state)
             child.state[blank_index],child.state[blank_index+1] = child.state[blank_index+1],child.state[blank_index]
             if child.state == goal_state.state:
                 child.setParent(parent_state)
                 return child
-            children.append(child)
-            # frontier.put((heuristic_fn(child,goal_state) + depth,child))
+            children.append(child)        
 
         if blank_col-1 >= 0:
             child = state(parent_state.state)
-            child.state[blank_index],child.state[blank_index-1] = child.state[blank_index-1],child.state[blank_index]
-            if child.state == goal_state.state:
+            child.state[blank_index],child.state[blank_index-1] = child.state[blank_index-1],child.state[blank_index]                        
+            if child.state == goal_state.state:                
                 child.setParent(parent_state)
                 return child
             children.append(child)
-            # frontier.put((heuristic_fn(child,goal_state) + depth,child))
 
         if blank_row+1 <= 2:
             child = state(parent_state.state)
@@ -84,8 +109,6 @@ def AStar(start_state:state , goal_state:state,heuristic_fn):
                 return child
             
             children.append(child)
-            # frontier.put((heuristic_fn(child,goal_state) + depth,child))
-
 
         if blank_row-1 >= 0:
             child = state(parent_state.state)
@@ -94,7 +117,6 @@ def AStar(start_state:state , goal_state:state,heuristic_fn):
                 child.setParent(parent_state)
                 return child
             children.append(child)
-            # frontier.put((heuristic_fn(child,goal_state) + depth,child))
 
         
         for child in children:
@@ -104,12 +126,8 @@ def AStar(start_state:state , goal_state:state,heuristic_fn):
                 frontier.put((cost,child))
 
 
-
-
-
-
-
-ststate = state("123456780")
-endstate = state("123457608")
-# print(ststate.state)
-AStar(ststate,endstate,manhattan_distance)
+start=state("125348670")
+goal=state("012345678")
+# ch = AStar(start,goal,manhattan_distance)
+ch = AStar(start,goal,euclidean_distance)
+traverse(ch)
