@@ -10,14 +10,15 @@ class Tiles:
 
 
 class state:
-    def __init__(self,state):
-        # parent is another state object
+    def __init__(self,state):    
         self.state = list(state)
         self.parent = None
         self.children = []
+        self.depth = 0
     def setParent(self,parent):
         self.parent = parent
         self.parent.children.append(self)
+        self.depth+=1
     def printState(self):
         for i in range(3):
             ithrow = self.state[(3*i):(3*(i+1))]
@@ -27,6 +28,7 @@ class state:
 
     def __lt__(self,other):
         return self.state < other.state
+    
 
 def manhattan_distance(state:state,goal:state):
     tiles_start = [Tiles(i,state.state[i]) for i in range(9)]
@@ -120,9 +122,12 @@ def AStar(start_state:state , goal_state:state,heuristic_fn):
 
         
         for child in children:
-            if not (child.state in explored) and not (child in frontier.queue):
+            if not (child.state in explored):
+                cost = heuristic_fn(child,goal_state)+ child.depth
+                for priority, statee in frontier.queue:
+                    if (child.state == statee.state) and priority < cost:
+                        continue
                 child.setParent(parent_state)
-                cost = heuristic_fn(child,goal_state)+depth
                 frontier.put((cost,child))
 
 
