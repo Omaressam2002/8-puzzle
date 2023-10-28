@@ -14,4 +14,4 @@ class state:
             ithrow = self.state[(3*i):(3*(i+1))]
             print(ithrow)
     def toString(self):
-        print(''.join(self.state))
+        return ''.join(self.state)

@@ -1,12 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox, Label
-from customtkinter import CTk, CTkFrame, CTkLabel, CTkButton, CTkSlider, CTkComboBox, CTkCanvas, CTkRadioButton
+from customtkinter import CTk, CTkFrame, CTkLabel, CTkButton, CTkSlider, CTkComboBox, CTkCanvas, CTkRadioButton, CTkScrollableFrame, CTkCheckBox
 import customtkinter as ctk
 import numpy as np
 from PIL import ImageTk, Image
 import time
 import BFS, DFS, Astar, Tree, utils, State
+import networkx as nx
+import matplotlib.pyplot as plt
 
 class EightPuzzleGame:
     def __init__(self):
@@ -17,7 +19,7 @@ class EightPuzzleGame:
 
         self.root = CTk()
         self.root.title("8-Puzzle Game")
-        self.root.geometry('700x400')
+        self.root.geometry('1200x500')
         self.root.resizable(False, False)
         background = ImageTk.PhotoImage(Image.open("assets/purple space.jpg"))
         background_label = CTkLabel(self.root, image= background, text="")
@@ -56,8 +58,14 @@ class EightPuzzleGame:
         self.puzzle_frame = CTkFrame(self.root, width=90)
         self.puzzle_frame.pack()
         
-        self.back_button = CTkButton(self.puzzle_frame, text="Back", command=self.return_to_start_page, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        self.back_button.pack(pady=10, padx=20, anchor='nw')
+        buttons1_frame = CTkFrame(self.puzzle_frame)
+        buttons1_frame.pack(pady=(10,5), padx=5)
+        
+        self.back_button = CTkButton(buttons1_frame, text="Back", command=self.return_to_start_page, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.back_button.pack(pady=10, padx=20, side = 'left')
+        
+        self.nodes_expanded_button = CTkCheckBox(buttons1_frame, text="Nodes Expanded", command=self.return_to_start_page, width=90, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.nodes_expanded_button.pack(pady=10, padx=20, side = 'left')
         
         self.speed_label = CTkLabel(self.puzzle_frame, text="Speed", font=("joystix monospace", 12))
         self.speed_label.pack()
@@ -87,32 +95,46 @@ class EightPuzzleGame:
         buttons2_frame = CTkFrame(self.puzzle_frame)
         buttons2_frame.pack(pady=(2,20), padx=10)
         
-        self.show_tree_button = CTkButton(buttons2_frame, text="Show Search Tree", width=70, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.show_tree_button = CTkCheckBox(buttons2_frame, text="Show Search Tree", width=70, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         self.show_tree_button.pack(side='left', pady=10, padx=20)
 
         self.reset_button = CTkButton(buttons2_frame, text="Reset", command=self.reset_puzzle, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         self.reset_button.pack(side='left', pady=10, padx=20)
         
+        self.analysis_frame = CTkScrollableFrame(self.root, width = 300, height=250)
+        self.analysis_frame.pack()
+        
         self.show_start_page()
 
     def show_start_page(self):
         self.puzzle_frame.pack_forget()
+        self.analysis_frame.pack_forget()
         self.start_frame.pack(pady=50)
         
     def return_to_start_page(self):
         self.clear_puzzle()
         self.puzzle_frame.pack_forget()
+        widgets = self.analysis_frame.winfo_children()
+        # Destroy each widget in the frame
+        for widget in widgets:
+            widget.destroy()
+        self.analysis_frame.pack_forget()
         self.start_frame.pack(pady=50)
         self.canvas.pack_forget()
 
     def show_puzzle_page(self):
         self.start_frame.pack_forget()
-        self.puzzle_frame.pack(side='left', pady=10, padx=(40,20))
+        self.puzzle_frame.pack(side='left', pady=10, padx=(100,40))
         
         self.canvas = CTkCanvas(self.root, width=322, height=322)
         self.canvas.pack(side='left')
         
         self.draw_puzzle(self.initial_state)
+        
+        
+        self.analysis_frame.pack(side = 'left', padx=(40,40))
+        self.analysis_frame_title = CTkLabel(self.analysis_frame, text ="Analysis History", font=("joystix monospace", 16))
+        self.analysis_frame_title.pack()
 
     def draw_puzzle(self, state):
         
@@ -158,9 +180,16 @@ class EightPuzzleGame:
     def reset_puzzle(self):
         self.clear_puzzle
         self.canvas.pack_forget()
+        widgets = self.analysis_frame.winfo_children()
+        # Destroy each widget in the frame
+        for widget in widgets:
+            widget.destroy()
+        self.analysis_frame.pack_forget()
         self.canvas = CTkCanvas(self.root, width=322, height=322)
-        # self.canvas.configure(background="blue")
-        self.canvas.pack(side='left')
+        self.canvas.pack(side = 'left')
+        self.analysis_frame.pack(side = 'left', padx=(40,40))
+        self.analysis_frame_title = CTkLabel(self.analysis_frame, text ="Analysis History", font=("joystix monospace", 16))
+        self.analysis_frame_title.pack()
         self.draw_puzzle(self.initial_state)
            
     def clear_puzzle(self):
@@ -177,14 +206,6 @@ class EightPuzzleGame:
             
         elif theme == "Light":
             ctk.set_appearance_mode("Light")        
-            
-    def test_speed(self, current_state):
-        # self.speed= self.speed_slider.get()
-        # self.speed = 5
-        print(self.speed)
-        print(current_state)
-        self.clear_puzzle()
-        self.draw_puzzle(current_state)
         
     def start_search(self):
         self.speed = self.speed_slider.get()
@@ -195,73 +216,143 @@ class EightPuzzleGame:
             print("IN BFS")
             list_of_states, num_of_steps, child, start = BFS.BFS_interface(self.initial_state, self.goal_state)
             list_of_states = list_of_states[::-1]
+            self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
             for state in list_of_states:
                 self.draw_puzzle(state)
                 print(state)
                 self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
                 i += 1
+            if self.show_tree_button.get():
+                self.construct(start)
+                self.construct(child)
+                
         elif (self.technique == 'DFS'):
             print("IN DFS")
             list_of_states, num_of_steps, child, start = DFS.DFS_interface(self.initial_state, self.goal_state)
             print("States: ", list_of_states)
             list_of_states = list_of_states[::-1]
+            self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
             for state in list_of_states:
                 self.draw_puzzle(state)
                 print(state)
                 self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
                 i += 1
+            if self.show_tree_button.get():
+                self.construct(start)
+                
         elif (self.technique == 'A* - Manhattan'):
             print("IN A*-MANHATTAN")
             print("initial state = ", self.initial_state)
             list_of_states, num_of_steps, child, start = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="manhattan")
             list_of_states = list_of_states[::-1]
-            print("states: ", list_of_states)
+            self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
             for state in list_of_states:
                 self.draw_puzzle(state)
                 print(state)
                 self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
                 i += 1
+            if self.show_tree_button.get():
+                self.construct(start)
+            
         elif (self.technique == 'A* - Euclidean'):
             print("IN A*-ECULIDEAN")
             print("initial state = ", self.initial_state)
             list_of_states, num_of_steps, child, start = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="euclidean")
             list_of_states = list_of_states[::-1]
-            print("states: ", list_of_states)
+            self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
             for state in list_of_states:
                 self.draw_puzzle(state)
                 print(state)
                 self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
                 i += 1
+            if self.show_tree_button.get():
+                self.construct(start)
         
-        # current_state1 = np.array(['4', '5', '1', '0', '8', '2', '6', '3', '7'])
-        # self.test_speed(current_state1)
-        # self.root.after(0 *int(self.speed), self.test_speed, current_state1)
-    
-        # current_state2 = np.array(['4', '5', '1', '8', '0', '2', '6', '3', '7'])
-        # self.test_speed(current_state2)
-        # self.root.after(1000 *int(self.speed), self.test_speed, current_state2)
+    def analyze_algorithm (self, algorithm, iteration, number_of_steps):
+        label_text = f"{algorithm} {iteration} Steps: {number_of_steps}"
+        analysis_label = CTkLabel(self.analysis_frame, text = label_text, font=("joystix monospace", 12))   
+        analysis_label.pack(anchor="w")
         
-        # current_state3 = np.array(['4', '5', '1', '8', '2', '0', '6', '3', '7'])
-        # self.test_speed(self.initial_state)
-        # self.root.after(2000 *int(self.speed), self.test_speed, current_state3)
-        
-        # current_state4 = np.array(['4', '5', '1', '8', '2', '6', '0', '3', '7'])
-        # self.test_speed(current_state4)
-        # self.root.after(3000 *int(self.speed), self.test_speed, current_state4)
-        
-        # current_state5 = np.array(['4', '5', '1', '8', '2', '6', '3', '0', '7'])
-        # self.test_speed(current_state5)
-        # self.root.after(4000 *int(self.speed), self.test_speed, current_state5)
-        # for i in number_of_steps:
-            
+    def construct(self, start):
+        tree_frame = tk.Frame(self.root)
+        tree_frame.pack()
 
+        #Directed graph for visualization
+        graph = nx.DiGraph()
+
+        # Function to recursively traverse and visualize the search tree
+        def visualize_search_tree(state, parent=None, level=0):
+            state.level = level  # Assign the level attribute to the node
+            graph.add_node(state)
+
+            # Add an edge to connect the node with its parent
+            if parent is not None:
+                graph.add_edge(parent, state)
+
+            # Recursively visualize the child nodes
+            for child_state in state.children:
+                visualize_search_tree(child_state, state, level + 1)
+
+        # Call the visualization function with the root state
+        visualize_search_tree(start)
+
+        # Create a networkx graph layout using the Spring layout algorithm
+        pos = nx.spring_layout(graph, seed=42)
+
+        # Get the node labels from the 'toString()' function
+        node_labels = {n: n.toString() for n in graph.nodes}
+
+        # Get the levels of the nodes for positioning
+        levels = {n: n.level for n in graph.nodes}
+
+        # Set node size and spacing
+        node_size = 500
+        vertical_spacing = 2.5
+
+        # Calculate the number of nodes in each level
+        level_counts = {level: sum(1 for node in graph.nodes if levels[node] == level) for level in set(levels.values())}
+
+        # Calculate the additional spacing needed for each level
+        additional_spacing = {level: (count - 1) * vertical_spacing for level, count in level_counts.items()}
+
+        # Adjust node positions based on levels and additional spacing
+        y_values = set(levels.values())
+        y_positions = {
+            level: -(i - (len(y_values) - 1) / 2) * vertical_spacing - additional_spacing[level] / 2
+            for i, level in enumerate(sorted(y_values))
+        }
+        adjusted_pos = {node: (pos[node][0], y_positions[levels[node]]) for node in graph.nodes}
+
+        # Draw the tree
+        nx.draw_networkx(
+            graph,
+            adjusted_pos,
+            with_labels=False,
+            node_shape='s',
+            node_size=node_size,
+            node_color='lightblue',
+            edgecolors='black',
+        )
+        nx.draw_networkx_labels(
+            graph,
+            adjusted_pos,
+            labels=node_labels,
+            font_size=10,
+            font_color='black',
+            verticalalignment='center',
+            bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.2'),
+        )
+
+        # Show the tree
+        plt.axis('off')
+        plt.show()
+        
     def run(self):
         # Show the puzzle visualization
-
         self.root.mainloop()
 
 app = EightPuzzleGame()
