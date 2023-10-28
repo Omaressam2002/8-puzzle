@@ -18,7 +18,7 @@ class state:
     def setParent(self,parent):
         self.parent = parent
         self.parent.children.append(self)
-        self.depth+=1
+        self.depth = self.parent.depth + 1
     def printState(self):
         for i in range(3):
             ithrow = self.state[(3*i):(3*(i+1))]
@@ -124,11 +124,16 @@ def AStar(start_state:state , goal_state:state,heuristic_fn):
         for child in children:
             if not (child.state in explored):
                 cost = heuristic_fn(child,goal_state)+ child.depth
-                for priority, statee in frontier.queue:
-                    if (child.state == statee.state) and priority < cost:
-                        continue
-                child.setParent(parent_state)
-                frontier.put((cost,child))
+                if child not in frontier.queue:
+                    child.setParent(parent_state)
+                    frontier.put((cost,child))
+                else:
+                    for old_cost, statee in frontier.queue:
+                        if (child.state == statee.state) and old_cost > cost:
+                            child.setParent(parent_state)
+                            frontier.put((cost,child))
+                            break
+                    
 
 
 start=state("125348670")
