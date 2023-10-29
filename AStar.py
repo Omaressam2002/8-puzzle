@@ -80,11 +80,10 @@ def AStar(start_state:state , goal_state:state,heuristic_fn):
 
     while not frontier.empty():
         _,parent_state = frontier.get()        
-        explored.append(parent_state)
+        explored.append(parent_state.state)
         blank_index = parent_state.state.index("0")
         blank_row = blank_index//3
         blank_col = blank_index%3
-        depth+=1
         children = []
         
         if blank_col+1 <= 2:                        
@@ -120,20 +119,24 @@ def AStar(start_state:state , goal_state:state,heuristic_fn):
                 return child
             children.append(child)
 
-        
         for child in children:
             if not (child.state in explored):
-                cost = heuristic_fn(child,goal_state)+ child.depth
-                if child not in frontier.queue:
+                cost = heuristic_fn(child,goal_state)+ child.depth                
+                isexist = False
+                for old_cost, statee in frontier.queue:
+                    if (child.state == statee.state) and old_cost > cost:
+                        child.setParent(parent_state)
+                        frontier.put((cost,child))
+                        frontier.queue.remove((old_cost,statee))
+                        isexist = True
+                        break
+
+                if not isexist:
                     child.setParent(parent_state)
                     frontier.put((cost,child))
-                else:
-                    for old_cost, statee in frontier.queue:
-                        if (child.state == statee.state) and old_cost > cost:
-                            child.setParent(parent_state)
-                            frontier.put((cost,child))
-                            break
-                    
+
+            isexist = False
+               
 
 
 start=state("125348670")
