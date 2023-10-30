@@ -10,6 +10,9 @@ import BFS, DFS, Astar, Tree, utils, State
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.widgets as mwidges
+import timeit
+
+  
 
 class EightPuzzleGame:
     def __init__(self):
@@ -325,8 +328,15 @@ class EightPuzzleGame:
         # Start the search algorithm to solve the puzzle
         if (self.technique == 'BFS'):
             print("IN BFS")
-            list_of_states, num_of_steps, child, start = BFS.BFS_interface(self.initial_state, self.goal_state)
+            # check running time from here
+            begin = timeit.default_timer()
+            list_of_states, num_of_steps, child, start, explored ,search_depth = BFS.BFS_interface(self.initial_state, self.goal_state)
+            stop = timeit.default_timer()
+
+            BFS_time = stop - begin
             list_of_states = list_of_states[::-1]
+            # explored doesnt need to be reversed
+            
             self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
             for state in list_of_states:
@@ -340,9 +350,16 @@ class EightPuzzleGame:
                 
         elif (self.technique == 'DFS'):
             print("IN DFS")
-            list_of_states, num_of_steps, child, start = DFS.DFS_interface(self.initial_state, self.goal_state)
-            print("States: ", list_of_states)
+            begin = timeit.default_timer()
+            list_of_states, num_of_steps, child, start, explored ,search_depth = DFS.DFS_interface(self.initial_state, self.goal_state)
+            stop = timeit.default_timer()
+
+            DFS_time = stop - begin
+
+            
             list_of_states = list_of_states[::-1]
+            print("States: ", list_of_states)
+            # explored doesnt need to be reversed
             self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
             for state in list_of_states:
@@ -356,7 +373,12 @@ class EightPuzzleGame:
         elif (self.technique == 'A* - Manhattan'):
             print("IN A*-MANHATTAN")
             print("initial state = ", self.initial_state)
-            list_of_states, num_of_steps, child, start = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="manhattan")
+            begin = timeit.default_timer()
+            list_of_states, num_of_steps, child, start, explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="manhattan")
+            stop = timeit.default_timer()
+
+            DFS_time = stop - begin
+
             list_of_states = list_of_states[::-1]
             self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
@@ -371,7 +393,13 @@ class EightPuzzleGame:
         elif (self.technique == 'A* - Euclidean'):
             print("IN A*-ECULIDEAN")
             print("initial state = ", self.initial_state)
-            list_of_states, num_of_steps, child, start = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="euclidean")
+            
+            begin = timeit.default_timer()
+
+            list_of_states, num_of_steps, child, start, explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="euclidean")
+            stop = timeit.default_timer()
+
+            DFS_time = stop - begin
             list_of_states = list_of_states[::-1]
             self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
