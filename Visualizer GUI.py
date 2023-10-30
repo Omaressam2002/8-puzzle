@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox, Label
-from customtkinter import CTk, CTkFrame, CTkLabel, CTkButton, CTkSlider, CTkComboBox, CTkCanvas, CTkRadioButton, CTkScrollableFrame, CTkCheckBox
+from customtkinter import CTk, CTkFrame, CTkLabel, CTkButton, CTkSlider, CTkComboBox, CTkCanvas, CTkRadioButton, CTkScrollableFrame, CTkCheckBox, CTkEntry
 import customtkinter as ctk
 import numpy as np
 from PIL import ImageTk, Image
@@ -9,6 +9,7 @@ import time
 import BFS, DFS, Astar, Tree, utils, State
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib.widgets as mwidges
 
 class EightPuzzleGame:
     def __init__(self):
@@ -83,14 +84,17 @@ class EightPuzzleGame:
         button_frame = CTkFrame(self.puzzle_frame)
         button_frame.pack(pady=10)
         
-        self.previous_button = CTkButton(button_frame, text="<-", width=20, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        self.previous_button.pack(side='left', padx=10)
+        # self.previous_button = CTkButton(button_frame, text="<-", width=20, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        # self.previous_button.pack(side='left', padx=10)
 
         self.start_button2 = CTkButton(button_frame, text="Start", command=self.start_search, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         self.start_button2.pack(side='left', pady=10)
         
-        self.next_button = CTkButton(button_frame, text="->", width=20, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        self.next_button.pack(side='left', padx=10)
+        # self.next_button = CTkButton(button_frame, text="->", width=20, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        # self.next_button.pack(side='left', padx=10)
+        
+        self.change_puzzle_button = CTkButton(button_frame, text="Change Puzzle", font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"), command= self.change_puzzle)
+        self.change_puzzle_button.pack(side='left', padx=10)
         
         buttons2_frame = CTkFrame(self.puzzle_frame)
         buttons2_frame.pack(pady=(2,20), padx=10)
@@ -104,9 +108,53 @@ class EightPuzzleGame:
         self.analysis_frame = CTkScrollableFrame(self.root, width = 300, height=250)
         self.analysis_frame.pack()
         
+        #### GRID FRAME ####
+
+        self.grid_frame = CTkFrame(self.root, width=300, height=200)
+        self.grid_frame.pack(padx=100)
+        
+        self.back2_button = CTkButton(self.grid_frame, text="Back", command=self.return_to_puzzle_page, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.back2_button.pack(anchor='nw', pady=20, padx=20)
+        
+        self.buttons_grid_frame = CTkFrame(self.grid_frame, width=300, height=300)
+        self.buttons_grid_frame.pack(padx=20)
+
+        self.temp = []
+        for i in range(9):
+            button = CTkButton(self.buttons_grid_frame, text=i, width=60, height=60,
+                            font=("joystix monospace", 30), fg_color=("#3A7EBF", "#504CD1"),
+                            command=lambda i=i: self.button_click(i))
+            button.grid(row=i // 3, column=i % 3, padx=2, pady=2)
+
+        input_box = CTkEntry(self.buttons_grid_frame, width=10, font=("joystix monospace", 12))
+        
+        buttons2_grid_frame = CTkFrame(self.grid_frame)
+        buttons2_grid_frame.pack(side='left', pady=(10,20), padx=20)
+        
+        self.clear_grid_button = CTkButton(buttons2_grid_frame, text="Clear", command=self.reset_change_puzzle, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.clear_grid_button.pack(side='left', pady=10, padx=10)
+        
+        self.save_button = CTkButton(buttons2_grid_frame, text="Save puzzle", command=self.save_puzzle, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.save_button.pack(side='left', pady=10, padx=10)
+        
         self.show_start_page()
+        
+        
+    def reset_change_puzzle(self):
+        self.temp = []
+        self.clear_puzzle
+        self.draw_puzzle(self.temp)
+        
+    def save_puzzle(self):
+        if (len(self.temp) == 9):
+            self.initial_state = np.array(self.temp)
+            print(self.initial_state)
+            self.clear_puzzle
+            self.draw_puzzle(self.initial_state)
+            self.return_to_puzzle_page
 
     def show_start_page(self):
+        self.grid_frame.pack_forget()
         self.puzzle_frame.pack_forget()
         self.analysis_frame.pack_forget()
         self.start_frame.pack(pady=50)
@@ -114,6 +162,7 @@ class EightPuzzleGame:
     def return_to_start_page(self):
         self.clear_puzzle()
         self.puzzle_frame.pack_forget()
+        self.grid_frame.pack_forget()
         widgets = self.analysis_frame.winfo_children()
         # Destroy each widget in the frame
         for widget in widgets:
@@ -121,11 +170,17 @@ class EightPuzzleGame:
         self.analysis_frame.pack_forget()
         self.start_frame.pack(pady=50)
         self.canvas.pack_forget()
-
-    def show_puzzle_page(self):
-        self.start_frame.pack_forget()
-        self.puzzle_frame.pack(side='left', pady=10, padx=(100,40))
         
+    def return_to_puzzle_page(self):
+        self.clear_puzzle
+        self.canvas.pack_forget()
+        self.grid_frame.pack_forget()
+        widgets = self.analysis_frame.winfo_children()
+        # Destroy each widget in the frame
+        for widget in widgets:
+            widget.destroy()
+        self.analysis_frame.pack_forget()
+        self.puzzle_frame.pack(side='left', pady=10, padx=(100,40))
         self.canvas = CTkCanvas(self.root, width=322, height=322)
         self.canvas.pack(side='left')
         
@@ -135,6 +190,36 @@ class EightPuzzleGame:
         self.analysis_frame.pack(side = 'left', padx=(40,40))
         self.analysis_frame_title = CTkLabel(self.analysis_frame, text ="Analysis History", font=("joystix monospace", 16))
         self.analysis_frame_title.pack()
+
+    def show_puzzle_page(self):
+        self.start_frame.pack_forget()
+        self.puzzle_frame.pack(side='left', pady=10, padx=(100,40))
+        self.grid_frame.pack_forget()
+        self.canvas = CTkCanvas(self.root, width=322, height=322)
+        self.canvas.pack(side='left')
+        
+        self.draw_puzzle(self.initial_state)
+        
+        
+        self.analysis_frame.pack(side = 'left', padx=(40,40))
+        self.analysis_frame_title = CTkLabel(self.analysis_frame, text ="Analysis History", font=("joystix monospace", 16))
+        self.analysis_frame_title.pack()
+
+    def change_puzzle(self):
+        self.start_frame.pack_forget()
+        self.analysis_frame.pack_forget()
+        widgets = self.analysis_frame.winfo_children()
+        # Destroy each widget in the frame
+        for widget in widgets:
+            widget.destroy()
+        self.clear_puzzle()
+        self.canvas.pack_forget()
+        self.puzzle_frame.pack_forget()
+        self.grid_frame.pack(side='left', padx=(300,20))
+        self.canvas = CTkCanvas(self.root, width=322, height=322)
+        self.canvas.pack(side='left', padx=(20,100))
+        
+        self.draw_puzzle(self.initial_state)
 
     def draw_puzzle(self, state):
         
@@ -206,6 +291,17 @@ class EightPuzzleGame:
             
         elif theme == "Light":
             ctk.set_appearance_mode("Light")        
+
+    def button_click(self, i):
+        if len(self.temp) > 9:
+            return
+        for j in range (len(self.temp)):
+            if i == int(self.temp[j]):
+                return
+        self.temp.append(str(i))
+        print(self.temp)
+        self.clear_puzzle
+        self.draw_puzzle(self.temp)
         
     def start_search(self):
         self.speed = self.speed_slider.get()
@@ -225,7 +321,7 @@ class EightPuzzleGame:
                 i += 1
             if self.show_tree_button.get():
                 self.construct(start)
-                self.construct(child)
+                # self.construct(child)
                 
         elif (self.technique == 'DFS'):
             print("IN DFS")
@@ -310,19 +406,20 @@ class EightPuzzleGame:
         levels = {n: n.level for n in graph.nodes}
 
         # Set node size and spacing
-        node_size = 500
+        node_size = 700
         vertical_spacing = 2.5
+        horizontal_spacing = 50.5
 
         # Calculate the number of nodes in each level
         level_counts = {level: sum(1 for node in graph.nodes if levels[node] == level) for level in set(levels.values())}
 
         # Calculate the additional spacing needed for each level
-        additional_spacing = {level: (count - 1) * vertical_spacing for level, count in level_counts.items()}
+        additional_spacing = {level: (count - 1) * horizontal_spacing for level, count in level_counts.items() if level != 0}
 
         # Adjust node positions based on levels and additional spacing
         y_values = set(levels.values())
         y_positions = {
-            level: -(i - (len(y_values) - 1) / 2) * vertical_spacing - additional_spacing[level] / 2
+            level: -(i - (len(y_values) - 1) / 2) * vertical_spacing - additional_spacing.get(level, 0) / 2
             for i, level in enumerate(sorted(y_values))
         }
         adjusted_pos = {node: (pos[node][0], y_positions[levels[node]]) for node in graph.nodes}
