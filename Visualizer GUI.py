@@ -113,8 +113,14 @@ class EightPuzzleGame:
         self.grid_frame = CTkFrame(self.root, width=300, height=200)
         self.grid_frame.pack(padx=100)
         
-        self.back2_button = CTkButton(self.grid_frame, text="Back", command=self.return_to_puzzle_page, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        self.back2_button.pack(anchor='nw', pady=20, padx=20)
+        buttons0_grid_frame = CTkFrame(self.grid_frame)
+        buttons0_grid_frame.pack(pady=(10,20), padx=10)
+        
+        self.back2_button = CTkButton(buttons0_grid_frame, text="Back", command=self.return_to_puzzle_page, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.back2_button.pack(side = 'left', pady=20, padx=20)
+        
+        self.clear_grid_button = CTkButton(buttons0_grid_frame, text="Clear", command=self.reset_change_puzzle, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.clear_grid_button.pack(side = 'left', pady=20, padx=10)
         
         self.buttons_grid_frame = CTkFrame(self.grid_frame, width=300, height=300)
         self.buttons_grid_frame.pack(padx=20)
@@ -131,27 +137,35 @@ class EightPuzzleGame:
         buttons2_grid_frame = CTkFrame(self.grid_frame)
         buttons2_grid_frame.pack(side='left', pady=(10,20), padx=20)
         
-        self.clear_grid_button = CTkButton(buttons2_grid_frame, text="Clear", command=self.reset_change_puzzle, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        self.clear_grid_button.pack(side='left', pady=10, padx=10)
+        # self.clear_grid_button = CTkButton(buttons2_grid_frame, text="Clear", command=self.reset_change_puzzle, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        # self.clear_grid_button.pack(side='left', pady=10, padx=10)
         
-        self.save_button = CTkButton(buttons2_grid_frame, text="Save puzzle", command=self.save_puzzle, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        self.save_button.pack(side='left', pady=10, padx=10)
+        self.save1_button = CTkButton(buttons2_grid_frame, text="Save as initial state", command=self.save_initial_puzzle, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.save1_button.pack(pady=(10,4), padx=4)
         
-        self.show_start_page()
+        self.save2_button = CTkButton(buttons2_grid_frame, text="Save as goal state", command=self.save_goal_puzzle, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.save2_button.pack(pady=(4,10), padx=4)
         
+        self.show_start_page()    
         
     def reset_change_puzzle(self):
         self.temp = []
         self.clear_puzzle
         self.draw_puzzle(self.temp)
         
-    def save_puzzle(self):
+    def save_initial_puzzle(self):
         if (len(self.temp) == 9):
             self.initial_state = np.array(self.temp)
             print(self.initial_state)
             self.clear_puzzle
             self.draw_puzzle(self.initial_state)
-            self.return_to_puzzle_page
+            print("INITIAL STATE SAVED SUCCESSFULLY")         
+
+    def save_goal_puzzle(self):
+        if (len(self.temp) == 9):
+                self.goal_state = np.array(self.temp)
+                print(self.goal_state)
+                print("GOAL STATE SAVED SUCCESSFULLY")    
 
     def show_start_page(self):
         self.grid_frame.pack_forget()
@@ -307,6 +321,7 @@ class EightPuzzleGame:
         self.speed = self.speed_slider.get()
         self.technique = self.technique_combobox.get()
         print(self.technique)
+        self.reset_puzzle
         # Start the search algorithm to solve the puzzle
         if (self.technique == 'BFS'):
             print("IN BFS")
