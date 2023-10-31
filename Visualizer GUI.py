@@ -68,7 +68,7 @@ class EightPuzzleGame:
         self.back_button = CTkButton(buttons1_frame, text="Back", command=self.return_to_start_page, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         self.back_button.pack(pady=10, padx=20, side = 'left')
         
-        self.nodes_expanded_button = CTkCheckBox(buttons1_frame, text="Nodes Expanded", command=self.return_to_start_page, width=90, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
+        self.nodes_expanded_button = CTkCheckBox(buttons1_frame, text="Nodes Expanded", width=90, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         self.nodes_expanded_button.pack(pady=10, padx=20, side = 'left')
         
         self.speed_label = CTkLabel(self.puzzle_frame, text="Speed", font=("joystix monospace", 12))
@@ -108,7 +108,7 @@ class EightPuzzleGame:
         self.reset_button = CTkButton(buttons2_frame, text="Reset", command=self.reset_puzzle, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         self.reset_button.pack(side='left', pady=10, padx=20)
         
-        self.analysis_frame = CTkScrollableFrame(self.root, width = 300, height=250)
+        self.analysis_frame = CTkScrollableFrame(self.root, width = 350, height=250)
         self.analysis_frame.pack()
         
         #### GRID FRAME ####
@@ -326,69 +326,104 @@ class EightPuzzleGame:
         print(self.technique)
         self.reset_puzzle
         # Start the search algorithm to solve the puzzle
+        
+        ####    BFS    ####
         if (self.technique == 'BFS'):
             print("IN BFS")
             # check running time from here
             begin = timeit.default_timer()
-            list_of_states, num_of_steps, child, start, explored ,search_depth = BFS.BFS_interface(self.initial_state, self.goal_state)
+            list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = BFS.BFS_interface(self.initial_state, self.goal_state)
             stop = timeit.default_timer()
 
             BFS_time = stop - begin
             list_of_states = list_of_states[::-1]
             # explored doesnt need to be reversed
-            
-            self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
-            for state in list_of_states:
-                self.draw_puzzle(state)
-                print(state)
-                self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
-                i += 1
-            if self.show_tree_button.get():
-                self.construct(start)
-                # self.construct(child)
+            if self.nodes_expanded_button.get():
+                for explored_state in list_of_explored:
+                    self.draw_puzzle(explored_state)
+                    print(explored_state)
+                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
+                    i += 1
+                self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = BFS_time, search_depth = search_depth)
+                if self.show_tree_button.get():
+                    self.construct(start)
+                    # self.construct(child)
+            else:
+                for state in list_of_states:
+                    self.draw_puzzle(state)
+                    print(state)
+                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
+                    i += 1
+                self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = BFS_time, search_depth = search_depth)
+                if self.show_tree_button.get():
+                    self.construct(start)
+                    # self.construct(child)
                 
         elif (self.technique == 'DFS'):
             print("IN DFS")
             begin = timeit.default_timer()
-            list_of_states, num_of_steps, child, start, explored ,search_depth = DFS.DFS_interface(self.initial_state, self.goal_state)
+            list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = DFS.DFS_interface(self.initial_state, self.goal_state)
             stop = timeit.default_timer()
 
             DFS_time = stop - begin
 
-            
             list_of_states = list_of_states[::-1]
             print("States: ", list_of_states)
             # explored doesnt need to be reversed
-            self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
-            for state in list_of_states:
-                self.draw_puzzle(state)
-                print(state)
-                self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
-                i += 1
-            if self.show_tree_button.get():
-                self.construct(start)
+            if self.nodes_expanded_button.get():
+                for explored_state in list_of_explored:
+                    self.draw_puzzle(explored_state)
+                    print(explored_state)
+                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
+                    i += 1
+                self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = DFS_time, search_depth = search_depth)
+                if self.show_tree_button.get():
+                    self.construct(start)
+                    # self.construct(child)
+            else:
+                for state in list_of_states:
+                    self.draw_puzzle(state)
+                    print(state)
+                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
+                    i += 1
+                self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = DFS_time, search_depth = search_depth)
+                if self.show_tree_button.get():
+                    self.construct(start)
+                    # self.construct(child)
                 
         elif (self.technique == 'A* - Manhattan'):
             print("IN A*-MANHATTAN")
             print("initial state = ", self.initial_state)
             begin = timeit.default_timer()
-            list_of_states, num_of_steps, child, start, explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="manhattan")
+            list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="manhattan")
             stop = timeit.default_timer()
 
-            DFS_time = stop - begin
+            astar_manhattan_time = stop - begin
 
             list_of_states = list_of_states[::-1]
-            self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
-            for state in list_of_states:
-                self.draw_puzzle(state)
-                print(state)
-                self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
-                i += 1
-            if self.show_tree_button.get():
-                self.construct(start)
+            if self.nodes_expanded_button.get():
+                for explored_state in list_of_explored:
+                    self.draw_puzzle(explored_state)
+                    print(explored_state)
+                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
+                    i += 1
+                self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = astar_manhattan_time, search_depth = search_depth)
+                if self.show_tree_button.get():
+                    self.construct(start)
+                    # self.construct(child)
+            else:
+                for state in list_of_states:
+                    self.draw_puzzle(state)
+                    print(state)
+                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
+                    i += 1
+                self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = astar_manhattan_time, search_depth = search_depth)
+                if self.show_tree_button.get():
+                    self.construct(start)
+                    # self.construct(child)
             
         elif (self.technique == 'A* - Euclidean'):
             print("IN A*-ECULIDEAN")
@@ -396,28 +431,40 @@ class EightPuzzleGame:
             
             begin = timeit.default_timer()
 
-            list_of_states, num_of_steps, child, start, explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="euclidean")
+            list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="euclidean")
             stop = timeit.default_timer()
 
-            DFS_time = stop - begin
+            astar_euclidean_time = stop - begin
             list_of_states = list_of_states[::-1]
-            self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps)
             i = 0
-            for state in list_of_states:
-                self.draw_puzzle(state)
-                print(state)
-                self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
-                i += 1
-            if self.show_tree_button.get():
-                self.construct(start)
+            if self.nodes_expanded_button.get():
+                for explored_state in list_of_explored:
+                    self.draw_puzzle(explored_state)
+                    print(explored_state)
+                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
+                    i += 1
+                self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = astar_euclidean_time, search_depth = search_depth)
+                if self.show_tree_button.get():
+                    self.construct(start)
+                    # self.construct(child)
+            else:
+                for state in list_of_states:
+                    self.draw_puzzle(state)
+                    print(state)
+                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
+                    i += 1
+                self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = astar_euclidean_time, search_depth = search_depth)
+                if self.show_tree_button.get():
+                    self.construct(start)
+                    # self.construct(child)
         
-    def analyze_algorithm (self, algorithm, iteration, number_of_steps):
-        label_text = f"{algorithm} {iteration} Steps: {number_of_steps}"
-        analysis_label = CTkLabel(self.analysis_frame, text = label_text, font=("joystix monospace", 12))   
-        analysis_label.pack(anchor="w")
+    def analyze_algorithm (self, algorithm, iteration, number_of_steps, time_taken, search_depth):
+        steps_text = f"--> {algorithm} {iteration} Steps: {number_of_steps}\n Time taken: {time_taken*1000:.4f} ms\n Search depth: {search_depth}"
+        analysis_label = CTkLabel(self.analysis_frame, text = steps_text, font=("joystix monospace", 12), width = 280)   
+        analysis_label.pack(anchor="w", pady=3)
         
     def construct(self, start):
-        tree_frame = tk.Frame(self.root)
+        tree_frame = CTkFrame(self.root)
         tree_frame.pack()
 
         #Directed graph for visualization
@@ -440,7 +487,7 @@ class EightPuzzleGame:
         visualize_search_tree(start)
 
         # Create a networkx graph layout using the Spring layout algorithm
-        pos = nx.spring_layout(graph, seed=42)
+        pos = nx.spring_layout(graph, k=2)
 
         # Get the node labels from the 'toString()' function
         node_labels = {n: n.toString() for n in graph.nodes}
@@ -450,8 +497,9 @@ class EightPuzzleGame:
 
         # Set node size and spacing
         node_size = 700
-        vertical_spacing = 2.5
-        horizontal_spacing = 50.5
+        vertical_spacing = 500 
+        horizontal_spacing = 0
+        padx = 48
 
         # Calculate the number of nodes in each level
         level_counts = {level: sum(1 for node in graph.nodes if levels[node] == level) for level in set(levels.values())}
@@ -462,8 +510,8 @@ class EightPuzzleGame:
         # Adjust node positions based on levels and additional spacing
         y_values = set(levels.values())
         y_positions = {
-            level: -(i - (len(y_values) - 1) / 2) * vertical_spacing - additional_spacing.get(level, 0) / 2
-            for i, level in enumerate(sorted(y_values))
+        level: -level * vertical_spacing - additional_spacing.get(level, 0)
+        for level in sorted(y_values)
         }
         adjusted_pos = {node: (pos[node][0], y_positions[levels[node]]) for node in graph.nodes}
 
@@ -482,6 +530,7 @@ class EightPuzzleGame:
             adjusted_pos,
             labels=node_labels,
             font_size=10,
+            font_family= "joystix monospace",
             font_color='black',
             verticalalignment='center',
             bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.2'),
