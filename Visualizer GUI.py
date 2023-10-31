@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox, Label
 from customtkinter import CTk, CTkFrame, CTkLabel, CTkButton, CTkSlider, CTkComboBox, CTkCanvas, CTkRadioButton, CTkScrollableFrame, CTkCheckBox, CTkEntry
+# import CTkMessagebox as CTkMessagebox
 import customtkinter as ctk
 import numpy as np
 from PIL import ImageTk, Image
@@ -9,7 +10,7 @@ import time
 import BFS, DFS, Astar, Tree, utils, State
 import networkx as nx
 import matplotlib.pyplot as plt
-import matplotlib.widgets as mwidges
+import matplotlib.patches as mpatches
 import timeit
 
   
@@ -91,7 +92,7 @@ class EightPuzzleGame:
         # self.previous_button.pack(side='left', padx=10)
 
         self.start_button2 = CTkButton(button_frame, text="Start", command=self.start_search, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        self.start_button2.pack(side='left', pady=10)
+        self.start_button2.pack(side='left', pady=10, padx=10)
         
         # self.next_button = CTkButton(button_frame, text="->", width=20, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         # self.next_button.pack(side='left', padx=10)
@@ -110,6 +111,15 @@ class EightPuzzleGame:
         
         self.analysis_frame = CTkScrollableFrame(self.root, width = 350, height=250)
         self.analysis_frame.pack()
+        
+        # self.analysis_frame2 = CTkFrame(self.analysis_frame)
+        # self.analysis_frame2.pack()
+        
+        # self.analysis_frame_title = CTkLabel(self.analysis_frame2, text ="Analysis History", font=("joystix monospace", 16))
+        # self.analysis_frame_title.pack(side = 'left', padx=(40,0))
+        
+        # self.analysis_frame_clear_button = CTkButton(self.analysis_frame2, text ="Clear", width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"), command=self.clear_analysis_frame)
+        # self.analysis_frame_clear_button.pack(side = 'left', padx=(30,0))
         
         #### GRID FRAME ####
 
@@ -134,8 +144,6 @@ class EightPuzzleGame:
                             font=("joystix monospace", 30), fg_color=("#3A7EBF", "#504CD1"),
                             command=lambda i=i: self.button_click(i))
             button.grid(row=i // 3, column=i % 3, padx=2, pady=2)
-
-        input_box = CTkEntry(self.buttons_grid_frame, width=10, font=("joystix monospace", 12))
         
         buttons2_grid_frame = CTkFrame(self.grid_frame)
         buttons2_grid_frame.pack(side='left', pady=(10,20), padx=20)
@@ -149,7 +157,25 @@ class EightPuzzleGame:
         self.save2_button = CTkButton(buttons2_grid_frame, text="Save as goal state", command=self.save_goal_puzzle, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         self.save2_button.pack(pady=(4,10), padx=4)
         
-        self.show_start_page()    
+        self.show_start_page()   
+        
+    def is_solvable(self, initial_state, goal_state):
+        def count_inversions(state):
+            inversions = 0
+            size = state.size
+
+            for i in range(size - 1):
+                for j in range(i + 1, size):
+                    if state[i] != '0' and state[j] != '0' and state[i] > state[j]:
+                        inversions += 1
+                        
+            print("No of inversions: ", inversions)
+            return inversions
+
+        initial_inversions = count_inversions(initial_state)
+        goal_inversions = count_inversions(goal_state)
+
+        return initial_inversions % 2 == goal_inversions % 2 
         
     def reset_change_puzzle(self):
         self.temp = []
@@ -162,12 +188,14 @@ class EightPuzzleGame:
             print(self.initial_state)
             self.clear_puzzle
             self.draw_puzzle(self.initial_state)
+            self.reset_change_puzzle
             print("INITIAL STATE SAVED SUCCESSFULLY")         
 
     def save_goal_puzzle(self):
         if (len(self.temp) == 9):
                 self.goal_state = np.array(self.temp)
                 print(self.goal_state)
+                self.reset_change_puzzle
                 print("GOAL STATE SAVED SUCCESSFULLY")    
 
     def show_start_page(self):
@@ -197,31 +225,39 @@ class EightPuzzleGame:
         for widget in widgets:
             widget.destroy()
         self.analysis_frame.pack_forget()
-        self.puzzle_frame.pack(side='left', pady=10, padx=(100,40))
+        self.puzzle_frame.pack(side='left', pady=10, padx=(80,40))
         self.canvas = CTkCanvas(self.root, width=322, height=322)
         self.canvas.pack(side='left')
         
         self.draw_puzzle(self.initial_state)
         
-        
         self.analysis_frame.pack(side = 'left', padx=(40,40))
-        self.analysis_frame_title = CTkLabel(self.analysis_frame, text ="Analysis History", font=("joystix monospace", 16))
-        self.analysis_frame_title.pack()
+        self.analysis_frame2 = CTkFrame(self.analysis_frame)
+        self.analysis_frame2.pack()
+        self.analysis_frame_title = CTkLabel(self.analysis_frame2, text ="Analysis History", font=("joystix monospace", 16))
+        self.analysis_frame_title.pack(side = 'left', padx=(40,0))
+        
+        self.analysis_frame_clear_button = CTkButton(self.analysis_frame2, text ="Clear", width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"), command=self.clear_analysis_frame)
+        self.analysis_frame_clear_button.pack(side = 'left', padx=(30,0))
 
     def show_puzzle_page(self):
         self.start_frame.pack_forget()
-        self.puzzle_frame.pack(side='left', pady=10, padx=(100,40))
+        self.puzzle_frame.pack(side='left', pady=10, padx=(80,40))
         self.grid_frame.pack_forget()
         self.canvas = CTkCanvas(self.root, width=322, height=322)
         self.canvas.pack(side='left')
         
         self.draw_puzzle(self.initial_state)
         
-        
+        self.analysis_frame2 = CTkFrame(self.analysis_frame)
+        self.analysis_frame2.pack()
         self.analysis_frame.pack(side = 'left', padx=(40,40))
-        self.analysis_frame_title = CTkLabel(self.analysis_frame, text ="Analysis History", font=("joystix monospace", 16))
-        self.analysis_frame_title.pack()
-
+        self.analysis_frame_title = CTkLabel(self.analysis_frame2, text ="Analysis History", font=("joystix monospace", 16))
+        self.analysis_frame_title.pack(side = 'left', padx=(40,0))
+        
+        self.analysis_frame_clear_button = CTkButton(self.analysis_frame2, text ="Clear", width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"), command=self.clear_analysis_frame)
+        self.analysis_frame_clear_button.pack(side = 'left', padx=(30,0))
+        
     def change_puzzle(self):
         self.start_frame.pack_forget()
         self.analysis_frame.pack_forget()
@@ -279,20 +315,44 @@ class EightPuzzleGame:
                 # self.canvas.create_image(0,0,image=photo)
                 self.canvas.create_text(x + tile_width//2, y + tile_height//2, text=tile, font=("joystix monospace", 30), fill="#0C121C")
 
-    def reset_puzzle(self):
-        self.clear_puzzle
-        self.canvas.pack_forget()
+    def clear_analysis_frame(self):
         widgets = self.analysis_frame.winfo_children()
         # Destroy each widget in the frame
         for widget in widgets:
             widget.destroy()
         self.analysis_frame.pack_forget()
+        self.analysis_frame.pack(side = 'left', padx=(40,40))
+        self.analysis_frame2 = CTkFrame(self.analysis_frame)
+        self.analysis_frame2.pack()
+        self.analysis_frame_title = CTkLabel(self.analysis_frame2, text ="Analysis History", font=("joystix monospace", 16))
+        self.analysis_frame_title.pack(side = 'left', padx=(40,0))
+        
+        self.analysis_frame_clear_button = CTkButton(self.analysis_frame2, text ="Clear", width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"), command=self.clear_analysis_frame)
+        self.analysis_frame_clear_button.pack(side = 'left', padx=(30,0))
+        
+    def reset_puzzle(self):
+        self.clear_puzzle
+        self.canvas.pack_forget()
+        self.grid_frame.pack_forget()
+        
+        widgets = self.analysis_frame.winfo_children()
+        # Destroy each widget in the frame
+        for widget in widgets:
+            widget.destroy()
+        self.analysis_frame.pack_forget()
+        
         self.canvas = CTkCanvas(self.root, width=322, height=322)
         self.canvas.pack(side = 'left')
-        self.analysis_frame.pack(side = 'left', padx=(40,40))
-        self.analysis_frame_title = CTkLabel(self.analysis_frame, text ="Analysis History", font=("joystix monospace", 16))
-        self.analysis_frame_title.pack()
         self.draw_puzzle(self.initial_state)
+        self.analysis_frame.pack(side='left', padx=(40,40))
+        
+        self.analysis_frame2 = CTkFrame(self.analysis_frame)
+        self.analysis_frame2.pack()
+        self.analysis_frame_title = CTkLabel(self.analysis_frame2, text ="Analysis History", font=("joystix monospace", 16))
+        self.analysis_frame_title.pack(side = 'left', padx=(40,0))
+        
+        self.analysis_frame_clear_button = CTkButton(self.analysis_frame2, text ="Clear", width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"), command=self.clear_analysis_frame)
+        self.analysis_frame_clear_button.pack(side = 'left', padx=(30,0))
            
     def clear_puzzle(self):
         self.canvas.delete("all")
@@ -321,151 +381,161 @@ class EightPuzzleGame:
         self.draw_puzzle(self.temp)
         
     def start_search(self):
-        self.speed = self.speed_slider.get()
-        self.technique = self.technique_combobox.get()
-        print(self.technique)
-        self.reset_puzzle
-        # Start the search algorithm to solve the puzzle
-        
-        ####    BFS    ####
-        if (self.technique == 'BFS'):
-            print("IN BFS")
-            # check running time from here
-            begin = timeit.default_timer()
-            list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = BFS.BFS_interface(self.initial_state, self.goal_state)
-            stop = timeit.default_timer()
+        if self.is_solvable(self.initial_state, self.goal_state):
+            print("PUZZLE SOLVABLE")
 
-            BFS_time = stop - begin
-            list_of_states = list_of_states[::-1]
-            # explored doesnt need to be reversed
-            i = 0
-            if self.nodes_expanded_button.get():
-                for explored_state in list_of_explored:
-                    self.draw_puzzle(explored_state)
-                    print(explored_state)
-                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
-                    i += 1
-                self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = BFS_time, search_depth = search_depth)
-                if self.show_tree_button.get():
-                    self.construct(start)
-                    # self.construct(child)
-            else:
-                for state in list_of_states:
-                    self.draw_puzzle(state)
-                    print(state)
-                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
-                    i += 1
-                self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = BFS_time, search_depth = search_depth)
-                if self.show_tree_button.get():
-                    self.construct(start)
-                    # self.construct(child)
-                
-        elif (self.technique == 'DFS'):
-            print("IN DFS")
-            begin = timeit.default_timer()
-            list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = DFS.DFS_interface(self.initial_state, self.goal_state)
-            stop = timeit.default_timer()
-
-            DFS_time = stop - begin
-
-            list_of_states = list_of_states[::-1]
-            print("States: ", list_of_states)
-            # explored doesnt need to be reversed
-            i = 0
-            if self.nodes_expanded_button.get():
-                for explored_state in list_of_explored:
-                    self.draw_puzzle(explored_state)
-                    print(explored_state)
-                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
-                    i += 1
-                self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = DFS_time, search_depth = search_depth)
-                if self.show_tree_button.get():
-                    self.construct(start)
-                    # self.construct(child)
-            else:
-                for state in list_of_states:
-                    self.draw_puzzle(state)
-                    print(state)
-                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
-                    i += 1
-                self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = DFS_time, search_depth = search_depth)
-                if self.show_tree_button.get():
-                    self.construct(start)
-                    # self.construct(child)
-                
-        elif (self.technique == 'A* - Manhattan'):
-            print("IN A*-MANHATTAN")
-            print("initial state = ", self.initial_state)
-            begin = timeit.default_timer()
-            list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="manhattan")
-            stop = timeit.default_timer()
-
-            astar_manhattan_time = stop - begin
-
-            list_of_states = list_of_states[::-1]
-            i = 0
-            if self.nodes_expanded_button.get():
-                for explored_state in list_of_explored:
-                    self.draw_puzzle(explored_state)
-                    print(explored_state)
-                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
-                    i += 1
-                self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = astar_manhattan_time, search_depth = search_depth)
-                if self.show_tree_button.get():
-                    self.construct(start)
-                    # self.construct(child)
-            else:
-                for state in list_of_states:
-                    self.draw_puzzle(state)
-                    print(state)
-                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
-                    i += 1
-                self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = astar_manhattan_time, search_depth = search_depth)
-                if self.show_tree_button.get():
-                    self.construct(start)
-                    # self.construct(child)
+            self.speed = self.speed_slider.get()
+            self.technique = self.technique_combobox.get()
+            print(self.technique)
+            self.reset_puzzle
+            # Start the search algorithm to solve the puzzle
             
-        elif (self.technique == 'A* - Euclidean'):
-            print("IN A*-ECULIDEAN")
-            print("initial state = ", self.initial_state)
-            
-            begin = timeit.default_timer()
+            ####    BFS    ####
+            if (self.technique == 'BFS'):
+                print("IN BFS")
+                # check running time from here
+                begin = timeit.default_timer()
+                list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = BFS.BFS_interface(self.initial_state, self.goal_state)
+                stop = timeit.default_timer()
 
-            list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="euclidean")
-            stop = timeit.default_timer()
+                BFS_time = stop - begin
+                list_of_states = list_of_states[::-1]
+                # explored doesnt need to be reversed
+                i = 0
+                if self.nodes_expanded_button.get():
+                    for explored_state in list_of_explored:
+                        self.draw_puzzle(explored_state)
+                        print(explored_state)
+                        self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
+                        i += 1
+                    self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = BFS_time, search_depth = search_depth)
+                    if self.show_tree_button.get():
+                        self.construct(start, list_of_states, list_of_explored)
+                        # self.construct(child)
+                else:
+                    for state in list_of_states:
+                        self.draw_puzzle(state)
+                        print(state)
+                        self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
+                        i += 1
+                    self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = BFS_time, search_depth = search_depth)
+                    if self.show_tree_button.get():
+                        self.construct(start, list_of_states, list_of_explored)
+                        # self.construct(child)
+                    
+            elif (self.technique == 'DFS'):
+                print("IN DFS")
+                begin = timeit.default_timer()
+                list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = DFS.DFS_interface(self.initial_state, self.goal_state)
+                stop = timeit.default_timer()
 
-            astar_euclidean_time = stop - begin
-            list_of_states = list_of_states[::-1]
-            i = 0
-            if self.nodes_expanded_button.get():
-                for explored_state in list_of_explored:
-                    self.draw_puzzle(explored_state)
-                    print(explored_state)
-                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
-                    i += 1
-                self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = astar_euclidean_time, search_depth = search_depth)
-                if self.show_tree_button.get():
-                    self.construct(start)
-                    # self.construct(child)
-            else:
-                for state in list_of_states:
-                    self.draw_puzzle(state)
-                    print(state)
-                    self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
-                    i += 1
-                self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = astar_euclidean_time, search_depth = search_depth)
-                if self.show_tree_button.get():
-                    self.construct(start)
-                    # self.construct(child)
+                DFS_time = stop - begin
+
+                list_of_states = list_of_states[::-1]
+                print("States: ", list_of_states)
+                # explored doesnt need to be reversed
+                i = 0
+                if self.nodes_expanded_button.get():
+                    for explored_state in list_of_explored:
+                        self.draw_puzzle(explored_state)
+                        print(explored_state)
+                        self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
+                        i += 1
+                    self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = DFS_time, search_depth = search_depth)
+                    if self.show_tree_button.get():
+                        self.construct(start, list_of_states, list_of_explored)
+                        # self.construct(child)
+                else:
+                    for state in list_of_states:
+                        self.draw_puzzle(state)
+                        print(state)
+                        self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
+                        i += 1
+                    self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = DFS_time, search_depth = search_depth)
+                    if self.show_tree_button.get():
+                        self.construct(start, list_of_states, list_of_explored)
+                        # self.construct(child)
+                    
+            elif (self.technique == 'A* - Manhattan'):
+                print("IN A*-MANHATTAN")
+                print("initial state = ", self.initial_state)
+                begin = timeit.default_timer()
+                list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="manhattan")
+                stop = timeit.default_timer()
+
+                astar_manhattan_time = stop - begin
+
+                list_of_states = list_of_states[::-1]
+                i = 0
+                if self.nodes_expanded_button.get():
+                    for explored_state in list_of_explored:
+                        self.draw_puzzle(explored_state)
+                        print(explored_state)
+                        self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
+                        i += 1
+                    self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = astar_manhattan_time, search_depth = search_depth)
+                    if self.show_tree_button.get():
+                        self.construct(start, list_of_states, list_of_explored)
+                        # self.construct(child)
+                else:
+                    for state in list_of_states:
+                        self.draw_puzzle(state)
+                        print(state)
+                        self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
+                        i += 1
+                    self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = astar_manhattan_time, search_depth = search_depth)
+                    if self.show_tree_button.get():
+                        self.construct(start, list_of_states, list_of_explored)
+                        # self.construct(child)
+                
+            elif (self.technique == 'A* - Euclidean'):
+                print("IN A*-ECULIDEAN")
+                print("initial state = ", self.initial_state)
+                
+                begin = timeit.default_timer()
+
+                list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="euclidean")
+                stop = timeit.default_timer()
+
+                astar_euclidean_time = stop - begin
+                list_of_states = list_of_states[::-1]
+                i = 0
+                if self.nodes_expanded_button.get():
+                    for explored_state in list_of_explored:
+                        self.draw_puzzle(explored_state)
+                        print(explored_state)
+                        self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
+                        i += 1
+                    self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = astar_euclidean_time, search_depth = search_depth)
+                    if self.show_tree_button.get():
+                        self.construct(start, list_of_states, list_of_explored)
+                        # self.construct(child)
+                else:
+                    for state in list_of_states:
+                        self.draw_puzzle(state)
+                        print(state)
+                        self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
+                        i += 1
+                    self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = astar_euclidean_time, search_depth = search_depth)
+                    if self.show_tree_button.get():
+                        self.construct(start, list_of_states, list_of_explored)
+                        # self.construct(child)
+        else:
+            print("PUZZLE UNSOLVABLE")
+            solvable_text = "Oops.. It seems like the puzzle is \nunsolvable! Try changing either the\ninitial or goal state."
+            solvable_label = CTkLabel(self.analysis_frame, text = solvable_text, text_color = "red", font=("joystix monospace", 12), width = 200)   
+            solvable_label.pack(anchor="w", pady=4, padx=7)
+            return        
         
     def analyze_algorithm (self, algorithm, iteration, number_of_steps, time_taken, search_depth):
-        steps_text = f"--> {algorithm} {iteration} Steps: {number_of_steps}\n Time taken: {time_taken*1000:.4f} ms\n Search depth: {search_depth}"
+        steps_text = f"--> {algorithm} {iteration} Steps: {number_of_steps - 1}\n Time taken: {time_taken*1000:.4f} ms\n Search depth: {search_depth}"
         analysis_label = CTkLabel(self.analysis_frame, text = steps_text, font=("joystix monospace", 12), width = 280)   
         analysis_label.pack(anchor="w", pady=3)
         
-    def construct(self, start):
+    def construct(self, start, states, explored):
         tree_frame = CTkFrame(self.root)
         tree_frame.pack()
+        nodes_colors = []
 
         #Directed graph for visualization
         graph = nx.DiGraph()
@@ -474,6 +544,14 @@ class EightPuzzleGame:
         def visualize_search_tree(state, parent=None, level=0):
             state.level = level  # Assign the level attribute to the node
             graph.add_node(state)
+            
+            #Adding colors to the color array
+            if any(np.array_equal(np.array(list(state.toString())), arr) for arr in explored) and any(np.array_equal(np.array(list(state.toString())), arr) for arr in states):
+                nodes_colors.append("#FFC500")
+            elif any(np.array_equal(np.array(list(state.toString())), arr) for arr in explored):
+                nodes_colors.append("#B0F1FF") 
+            else:
+                nodes_colors.append("#353CAE")
 
             # Add an edge to connect the node with its parent
             if parent is not None:
@@ -487,7 +565,7 @@ class EightPuzzleGame:
         visualize_search_tree(start)
 
         # Create a networkx graph layout using the Spring layout algorithm
-        pos = nx.spring_layout(graph, k=2)
+        pos = nx.spring_layout(graph, k=0.05)
 
         # Get the node labels from the 'toString()' function
         node_labels = {n: n.toString() for n in graph.nodes}
@@ -522,7 +600,7 @@ class EightPuzzleGame:
             with_labels=False,
             node_shape='s',
             node_size=node_size,
-            node_color='lightblue',
+            node_color=nodes_colors,
             edgecolors='black',
         )
         nx.draw_networkx_labels(
@@ -535,7 +613,19 @@ class EightPuzzleGame:
             verticalalignment='center',
             bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.2'),
         )
+        
+        legend_patches = [
+            mpatches.Patch(color='#FFC500', label='Path'),
+            mpatches.Patch(color='#B0F1FF', label='Explored'),
+            mpatches.Patch(color='#353CAE', label='Not Explored')
+        ]
 
+        # Add legend
+        legend = plt.legend(handles=legend_patches, title='Node Status')
+        legend.get_title().set_fontsize(12)
+        for text in legend.get_texts():
+            text.set_fontsize(10)
+            text.set_fontfamily("Joystix Monospace")
         # Show the tree
         plt.axis('off')
         plt.show()
