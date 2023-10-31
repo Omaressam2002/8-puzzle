@@ -6,11 +6,11 @@
 - ~~display explored nodes~~ ***DONE***
 - ~~fix nodes levels in the search tree vertically~~ ***DONE***
 - ~~implement check solvable~~ ***DONE***
-- no. of steps -= 1?
+- ~~no. of steps -= 1?~~ ***DONE***
 - report
 
 ### Extras: #GUI 
-- colorize the search tree
+- ~~colorize the search tree~~ ***DONE***
 - implement manual mode
 - ~~clear analysis history independently~~ ***DONE***
 
