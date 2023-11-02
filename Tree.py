@@ -9,4 +9,4 @@ class tree:
             for child in root.children:
                 self.traverseTree(child)
             print(root.level)
-            print(root.state)
+            root.printState()

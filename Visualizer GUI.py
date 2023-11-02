@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import timeit
 
+import warnings
+warnings.filterwarnings("ignore")
+
   
 
 class EightPuzzleGame:
@@ -400,7 +403,6 @@ class EightPuzzleGame:
 
                 BFS_time = stop - begin
                 list_of_states = list_of_states[::-1]
-                # explored doesnt need to be reversed
                 i = 0
                 if self.nodes_expanded_button.get():
                     for explored_state in list_of_explored:
@@ -432,7 +434,6 @@ class EightPuzzleGame:
                 DFS_time = stop - begin
 
                 list_of_states = list_of_states[::-1]
-                print("States: ", list_of_states)
                 # explored doesnt need to be reversed
                 i = 0
                 if self.nodes_expanded_button.get():
@@ -458,7 +459,6 @@ class EightPuzzleGame:
                     
             elif (self.technique == 'A* - Manhattan'):
                 print("IN A*-MANHATTAN")
-                print("initial state = ", self.initial_state)
                 begin = timeit.default_timer()
                 list_of_states, num_of_steps, child, start, list_of_explored ,search_depth = Astar.Astar_interface(self.initial_state, self.goal_state, criterion="manhattan")
                 stop = timeit.default_timer()
@@ -490,7 +490,6 @@ class EightPuzzleGame:
                 
             elif (self.technique == 'A* - Euclidean'):
                 print("IN A*-ECULIDEAN")
-                print("initial state = ", self.initial_state)
                 
                 begin = timeit.default_timer()
 
@@ -533,6 +532,8 @@ class EightPuzzleGame:
         analysis_label.pack(anchor="w", pady=3)
         
     def construct(self, start, states, explored):
+        t = Tree.tree(start)
+        t.traverseTree(start)
         tree_frame = CTkFrame(self.root)
         tree_frame.pack()
         nodes_colors = []
