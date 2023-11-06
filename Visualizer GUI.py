@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox, Label
 from customtkinter import CTk, CTkFrame, CTkLabel, CTkButton, CTkSlider, CTkComboBox, CTkCanvas, CTkRadioButton, CTkScrollableFrame, CTkCheckBox, CTkEntry
-# import CTkMessagebox as CTkMessagebox
 import customtkinter as ctk
 import numpy as np
 from PIL import ImageTk, Image
@@ -39,8 +38,6 @@ class EightPuzzleGame:
         
         self.start_frame = CTkFrame(self.root)
         self.start_frame.pack()
-        # background_label = CTkLabel(self.start_frame, fg_color = "transparent")
-        # background_label.place(x=0, y=0, relwidth=1, relheight=1)
         
         self.title_label = CTkLabel(self.start_frame, text=" 8-Puzzle Game", font=("joystix monospace", 40))
         self.title_label.pack(pady=20, padx=60)
@@ -91,14 +88,10 @@ class EightPuzzleGame:
         button_frame = CTkFrame(self.puzzle_frame)
         button_frame.pack(pady=10)
         
-        # self.previous_button = CTkButton(button_frame, text="<-", width=20, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        # self.previous_button.pack(side='left', padx=10)
 
         self.start_button2 = CTkButton(button_frame, text="Start", command=self.start_search, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         self.start_button2.pack(side='left', pady=10, padx=10)
         
-        # self.next_button = CTkButton(button_frame, text="->", width=20, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        # self.next_button.pack(side='left', padx=10)
         
         self.change_puzzle_button = CTkButton(button_frame, text="Change Puzzle", font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"), command= self.change_puzzle)
         self.change_puzzle_button.pack(side='left', padx=10)
@@ -114,15 +107,6 @@ class EightPuzzleGame:
         
         self.analysis_frame = CTkScrollableFrame(self.root, width = 350, height=250)
         self.analysis_frame.pack()
-        
-        # self.analysis_frame2 = CTkFrame(self.analysis_frame)
-        # self.analysis_frame2.pack()
-        
-        # self.analysis_frame_title = CTkLabel(self.analysis_frame2, text ="Analysis History", font=("joystix monospace", 16))
-        # self.analysis_frame_title.pack(side = 'left', padx=(40,0))
-        
-        # self.analysis_frame_clear_button = CTkButton(self.analysis_frame2, text ="Clear", width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"), command=self.clear_analysis_frame)
-        # self.analysis_frame_clear_button.pack(side = 'left', padx=(30,0))
         
         #### GRID FRAME ####
 
@@ -151,8 +135,6 @@ class EightPuzzleGame:
         buttons2_grid_frame = CTkFrame(self.grid_frame)
         buttons2_grid_frame.pack(side='left', pady=(10,20), padx=20)
         
-        # self.clear_grid_button = CTkButton(buttons2_grid_frame, text="Clear", command=self.reset_change_puzzle, width=50, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
-        # self.clear_grid_button.pack(side='left', pady=10, padx=10)
         
         self.save1_button = CTkButton(buttons2_grid_frame, text="Save as initial state", command=self.save_initial_puzzle, font=("joystix monospace", 12), fg_color=("#3A7EBF","#504CD1"))
         self.save1_button.pack(pady=(10,4), padx=4)
@@ -413,7 +395,6 @@ class EightPuzzleGame:
                     self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = BFS_time, search_depth = search_depth)
                     if self.show_tree_button.get():
                         self.construct(start, list_of_states, list_of_explored)
-                        # self.construct(child)
                 else:
                     for state in list_of_states:
                         self.draw_puzzle(state)
@@ -423,7 +404,6 @@ class EightPuzzleGame:
                     self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = BFS_time, search_depth = search_depth)
                     if self.show_tree_button.get():
                         self.construct(start, list_of_states, list_of_explored)
-                        # self.construct(child)
                     
             elif (self.technique == 'DFS'):
                 print("IN DFS")
@@ -445,7 +425,6 @@ class EightPuzzleGame:
                     self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = DFS_time, search_depth = search_depth)
                     if self.show_tree_button.get():
                         self.construct(start, list_of_states, list_of_explored)
-                        # self.construct(child)
                 else:
                     for state in list_of_states:
                         self.draw_puzzle(state)
@@ -455,7 +434,6 @@ class EightPuzzleGame:
                     self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = DFS_time, search_depth = search_depth)
                     if self.show_tree_button.get():
                         self.construct(start, list_of_states, list_of_explored)
-                        # self.construct(child)
                     
             elif (self.technique == 'A* - Manhattan'):
                 print("IN A*-MANHATTAN")
@@ -476,7 +454,6 @@ class EightPuzzleGame:
                     self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = astar_manhattan_time, search_depth = search_depth)
                     if self.show_tree_button.get():
                         self.construct(start, list_of_states, list_of_explored)
-                        # self.construct(child)
                 else:
                     for state in list_of_states:
                         self.draw_puzzle(state)
@@ -486,10 +463,10 @@ class EightPuzzleGame:
                     self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = astar_manhattan_time, search_depth = search_depth)
                     if self.show_tree_button.get():
                         self.construct(start, list_of_states, list_of_explored)
-                        # self.construct(child)
                 
             elif (self.technique == 'A* - Euclidean'):
                 print("IN A*-ECULIDEAN")
+                print("initial state = ", self.initial_state)
                 
                 begin = timeit.default_timer()
 

@@ -3,7 +3,7 @@ from State import state
 from utils import *
 
 def DFS(start:state,goal:state,display=False):
-    found = False
+    flag = False
     qu = [ start ]
     explored = []
     search_depth = 0
@@ -24,6 +24,15 @@ def DFS(start:state,goal:state,display=False):
         # neighbors
         children = []
         #finding neighbors
+        if (row-1) >= 0  :
+            # swap el zero ma3 el peice el foo2eeh we enque it to the frontier list : zero <=> zero-3
+            child = state(start.state)
+            child.state[zero],child.state[zero-3] = child.state[zero-3],child.state[zero]
+            if goal.state == child.state :
+                child.setParent(start)
+                explored.append(child.state)
+                return child,explored,max(search_depth,child.level)
+            children.append(child)
         if (col+1) <= 2 :
             # swap el zero ma3 el peice el 3al yeemeeno we enque it to the frontier list : zero <=> zero+1
             child = state(start.state)
@@ -51,27 +60,9 @@ def DFS(start:state,goal:state,display=False):
                 explored.append(child.state)
                 return child,explored,max(search_depth,child.level)
             children.append(child)
-        if (row-1) >= 0  :
-            # swap el zero ma3 el peice el foo2eeh we enque it to the frontier list : zero <=> zero-3
-            child = state(start.state)
-            child.state[zero],child.state[zero-3] = child.state[zero-3],child.state[zero]
-            if goal.state == child.state :
-                child.setParent(start)
-                explored.append(child.state)
-                return child,explored,max(search_depth,child.level)
-            children.append(child)
-        if (row-1) >= 0  :
-            # swap el zero ma3 el peice el foo2eeh we enque it to the frontier list : zero <=> zero-3
-            child = state(start.state)
-            child.state[zero],child.state[zero-3] = child.state[zero-3],child.state[zero]
-            if goal.state == child.state :
-                child.setParent(start)
-                explored.append(child.state)
-                return child,explored,max(search_depth,child.level)
-            children.append(child)
 
         frontiers = [c.state for c in qu]
-        # kol wa7da minhom hanetcheck enha makanetsh fel frontier list abl kida we ba3dein hanzo2aha 
+        # kol wa7da minhom hanetcheck enha makanetsh fel frontier list abl kida we ba3dein hanenque it 
         for child in children:
             if not (child.state in explored) and not (child.state in frontiers):
                 child.setParent(start)
