@@ -17,12 +17,12 @@ def manhattan_distance(state:state,goal:state):
     tiles_end.sort(key=lambda x:x.value)
 
     tot_distance = 0
-    for i in range(9):
+    for i in range(1,9):
         distance = abs(tiles_start[i].position[0] - tiles_end[i].position[0]) + abs(tiles_start[i].position[1] - tiles_end[i].position[1])
+        
         tot_distance += distance
 
     return tot_distance
-
 
 def euclidean_distance(state:state,goal:state):
     tiles_start = [Tiles(i,state.state[i]) for i in range(9)]
@@ -32,7 +32,7 @@ def euclidean_distance(state:state,goal:state):
     tiles_end.sort(key=lambda x:x.value)
 
     tot_distance = 0
-    for i in range(9):
+    for i in range(1,9):
         distance = ((tiles_start[i].position[0] - tiles_end[i].position[0])**2 + (tiles_start[i].position[1] - tiles_end[i].position[1])**2)**0.5
         tot_distance += distance
 
@@ -43,6 +43,7 @@ def calc_heuristic2(state : state,goal:state,criterion='euclidean'):
         return euclidean_distance(state,goal)
     else:
         return manhattan_distance(state,goal)
+
 
 def listofState(state:state):
     list_of_states = []
@@ -61,7 +62,9 @@ def traverse(state:state,steps=0):
     else:
         print(steps-1)
         return 
-    
+
+
+
 def calc_heuristic(state:list,criterion='euclidean'):
     hn = 0 
     goal_ids = [(0,1),(0,2),(1,0),(1,1),(1,2),(2,0),(2,1),(2,2)]

@@ -3,12 +3,13 @@ import numpy as np
 from State import state
 from utils import *
 
-def A_star(start:state,goal:state,display=False,criterion="euclidean"):
+def A_star(start:state,goal:state,criterion,display=False):
+    print(criterion)
     flag = False
     if start.state == goal.state:
         return state
     qu = heapdict.heapdict()
-    cost = calc_heuristic2(start,criterion)
+    cost = calc_heuristic2(start,goal,criterion)
     # cost = calc_heuristic(start.state)
     qu[start] = cost
     explored = []
@@ -72,14 +73,14 @@ def A_star(start:state,goal:state,display=False,criterion="euclidean"):
             if not (child.state in explored) and not (child.state in frontiers):
                 child.setParent(start)
                 #cost = calc_heuristic(child.state,criterion) + child.level
-                cost = calc_heuristic2(child,criterion) + child.level
+                cost = calc_heuristic2(child,goal,criterion) + child.level
                 qu[child] = cost
             # else check for decrease key
             elif (child.state in frontiers):
                 prev_child  = [c for c in  qu.keys() if (c.state==child.state)][0]
                 prev_cost = qu[prev_child] 
                 #cost = calc_heuristic(child.state,criterion) + child.level
-                cost = calc_heuristic2(child,criterion) + child.level
+                cost = calc_heuristic2(child,goal,criterion) + child.level
                 #decrease key
                 if cost < prev_cost:
                     child.setParent(start)

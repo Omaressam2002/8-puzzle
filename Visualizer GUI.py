@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore")
 
 class EightPuzzleGame:
     def __init__(self):
-        self.initial_state = np.array(['1', '2', '5', '3', '4', '0', '6', '7', '8'])
+        self.initial_state = np.array(['8', '2', '1', '5', '4', '6', '0', '3', '7'])
         self.goal_state = np.array(['0', '1', '2', '3', '4', '5', '6', '7', '8'])
         self.speed = 0
         self.technique = "BFS"
@@ -389,7 +389,7 @@ class EightPuzzleGame:
                 if self.nodes_expanded_button.get():
                     for explored_state in list_of_explored:
                         self.draw_puzzle(explored_state)
-                        print(explored_state)
+                        #print(explored_state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
                         i += 1
                     self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = BFS_time, search_depth = search_depth)
@@ -398,7 +398,7 @@ class EightPuzzleGame:
                 else:
                     for state in list_of_states:
                         self.draw_puzzle(state)
-                        print(state)
+                        #print(state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
                         i += 1
                     self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = BFS_time, search_depth = search_depth)
@@ -419,7 +419,7 @@ class EightPuzzleGame:
                 if self.nodes_expanded_button.get():
                     for explored_state in list_of_explored:
                         self.draw_puzzle(explored_state)
-                        print(explored_state)
+                        #print(explored_state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
                         i += 1
                     self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = DFS_time, search_depth = search_depth)
@@ -428,7 +428,7 @@ class EightPuzzleGame:
                 else:
                     for state in list_of_states:
                         self.draw_puzzle(state)
-                        print(state)
+                        #print(state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
                         i += 1
                     self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = DFS_time, search_depth = search_depth)
@@ -448,7 +448,7 @@ class EightPuzzleGame:
                 if self.nodes_expanded_button.get():
                     for explored_state in list_of_explored:
                         self.draw_puzzle(explored_state)
-                        print(explored_state)
+                        #print(explored_state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
                         i += 1
                     self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = astar_manhattan_time, search_depth = search_depth)
@@ -457,7 +457,7 @@ class EightPuzzleGame:
                 else:
                     for state in list_of_states:
                         self.draw_puzzle(state)
-                        print(state)
+                        #print(state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
                         i += 1
                     self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = astar_manhattan_time, search_depth = search_depth)
@@ -479,7 +479,7 @@ class EightPuzzleGame:
                 if self.nodes_expanded_button.get():
                     for explored_state in list_of_explored:
                         self.draw_puzzle(explored_state)
-                        print(explored_state)
+                        #print(explored_state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
                         i += 1
                     self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = astar_euclidean_time, search_depth = search_depth)
@@ -489,7 +489,7 @@ class EightPuzzleGame:
                 else:
                     for state in list_of_states:
                         self.draw_puzzle(state)
-                        print(state)
+                        #print(state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, state) 
                         i += 1
                     self.analyze_algorithm(self.technique, iteration= "Path", number_of_steps = num_of_steps, time_taken = astar_euclidean_time, search_depth = search_depth)
@@ -509,8 +509,8 @@ class EightPuzzleGame:
         analysis_label.pack(anchor="w", pady=3)
         
     def construct(self, start, states, explored):
-        t = Tree.tree(start)
-        t.traverseTree(start)
+        #t = Tree.tree(start)
+        #t.traverseTree(start)
         tree_frame = CTkFrame(self.root)
         tree_frame.pack()
         nodes_colors = []
