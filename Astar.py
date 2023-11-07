@@ -12,13 +12,12 @@ def A_star(start:state,goal:state,criterion,display=False):
     cost = calc_heuristic2(start,goal,criterion)
     # cost = calc_heuristic(start.state)
     qu[start] = cost
-    explored = []
+    explored = set()
     search_depth = 0
     while len(qu) != 0:
         # to check for children and enqueue them
         start = qu.popitem()[0]
-
-        explored.append(start.state)
+        explored.add(start.toString())
         search_depth = max(search_depth,start.level)
         
         zero = start.state.index("0")
@@ -35,7 +34,7 @@ def A_star(start:state,goal:state,criterion,display=False):
             child.state[zero],child.state[zero+1] = child.state[zero+1],child.state[zero]
             if goal.state == child.state :
                 child.setParent(start)
-                explored.append(child.state)
+                explored.add(child.toString())
                 return child,explored,max(search_depth,child.level)
             children.append(child)
         if (col-1) >= 0 :
@@ -44,7 +43,7 @@ def A_star(start:state,goal:state,criterion,display=False):
             child.state[zero],child.state[zero-1] = child.state[zero-1],child.state[zero]
             if goal.state == child.state :
                 child.setParent(start)
-                explored.append(child.state)
+                explored.add(child.toString())
                 return child,explored,max(search_depth,child.level)
             children.append(child)
         if (row+1) <= 2 :
@@ -53,7 +52,7 @@ def A_star(start:state,goal:state,criterion,display=False):
             child.state[zero],child.state[zero+3] = child.state[zero+3],child.state[zero]
             if goal.state == child.state :
                 child.setParent(start)
-                explored.append(child.state)
+                explored.add(child.toString())
                 return child,explored,max(search_depth,child.level)
             children.append(child)
         if (row-1) >= 0  :
@@ -62,21 +61,24 @@ def A_star(start:state,goal:state,criterion,display=False):
             child.state[zero],child.state[zero-3] = child.state[zero-3],child.state[zero]
             if goal.state == child.state :
                 child.setParent(start)
-                explored.append(child.state)
+                explored.add(child.toString())
                 return child,explored,max(search_depth,child.level)
             children.append(child)
 
-        frontiers = [x.state for x in qu.keys()]
+        # frontiers = [x.toString() for x in qu.keys()]
+        frontiers = set()
+        for k in qu.keys():
+            frontiers.add(k.toString())
         # kol wa7da minhom hanetcheck enha makanetsh fel frontier list abl kida we ba3dein hanenque it 
         for child in children:
             # law it was never there put immediately
-            if not (child.state in explored) and not (child.state in frontiers):
+            if not (child.toString() in explored) and not (child.toString() in frontiers):
                 child.setParent(start)
                 #cost = calc_heuristic(child.state,criterion) + child.level
                 cost = calc_heuristic2(child,goal,criterion) + child.level
                 qu[child] = cost
             # else check for decrease key
-            elif (child.state in frontiers):
+            elif (child.toString() in frontiers):
                 prev_child  = [c for c in  qu.keys() if (c.state==child.state)][0]
                 prev_cost = qu[prev_child] 
                 #cost = calc_heuristic(child.state,criterion) + child.level
