@@ -387,9 +387,8 @@ class EightPuzzleGame:
                 list_of_states = list_of_states[::-1]
                 i = 0
                 if self.nodes_expanded_button.get():
-                    for explored_state in list_of_explored:
+                    for explored_state in list(list_of_explored):
                         self.draw_puzzle(explored_state)
-                        #print(explored_state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
                         i += 1
                     self.analyze_algorithm(self.technique, iteration= "explored", number_of_steps = len(list_of_explored), time_taken = BFS_time, search_depth = search_depth)
@@ -417,7 +416,7 @@ class EightPuzzleGame:
                 # explored doesnt need to be reversed
                 i = 0
                 if self.nodes_expanded_button.get():
-                    for explored_state in list_of_explored:
+                    for explored_state in list(list_of_explored):
                         self.draw_puzzle(explored_state)
                         #print(explored_state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
@@ -446,7 +445,7 @@ class EightPuzzleGame:
                 list_of_states = list_of_states[::-1]
                 i = 0
                 if self.nodes_expanded_button.get():
-                    for explored_state in list_of_explored:
+                    for explored_state in list(list_of_explored):
                         self.draw_puzzle(explored_state)
                         #print(explored_state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 
@@ -477,7 +476,7 @@ class EightPuzzleGame:
                 list_of_states = list_of_states[::-1]
                 i = 0
                 if self.nodes_expanded_button.get():
-                    for explored_state in list_of_explored:
+                    for explored_state in list(list_of_explored):
                         self.draw_puzzle(explored_state)
                         #print(explored_state)
                         self.root.after((i*100) *int(self.speed), self.draw_puzzle, explored_state) 

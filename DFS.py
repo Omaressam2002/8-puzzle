@@ -5,7 +5,9 @@ from utils import *
 def DFS(start:state,goal:state,display=False):
     flag = False
     qu = [ start ]
-    explored = []
+    explored = set()
+    frontiers = set()
+    frontiers.add(start.toString())
     search_depth = 0
     if start.state == goal.state:
         return start
@@ -13,8 +15,9 @@ def DFS(start:state,goal:state,display=False):
         # to check for children and enqueue them
         start = qu[len(qu)-1]
         qu.remove(qu[len(qu)-1])
+        frontiers.remove(start.toString())
 
-        explored.append(start.state)
+        explored.add(start.toString())
         search_depth = max(search_depth,start.level)
     
         zero = start.state.index("0")
@@ -30,7 +33,7 @@ def DFS(start:state,goal:state,display=False):
             child.state[zero],child.state[zero-3] = child.state[zero-3],child.state[zero]
             if goal.state == child.state :
                 child.setParent(start)
-                explored.append(child.state)
+                explored.add(child.toString())
                 return child,explored,max(search_depth,child.level)
             children.append(child)
         if (col+1) <= 2 :
@@ -39,7 +42,7 @@ def DFS(start:state,goal:state,display=False):
             child.state[zero],child.state[zero+1] = child.state[zero+1],child.state[zero]
             if goal.state == child.state :
                 child.setParent(start)
-                explored.append(child.state)
+                explored.add(child.toString())
                 return child,explored,max(search_depth,child.level)
             children.append(child)
         if (col-1) >= 0 :
@@ -48,7 +51,7 @@ def DFS(start:state,goal:state,display=False):
             child.state[zero],child.state[zero-1] = child.state[zero-1],child.state[zero]
             if goal.state == child.state :
                 child.setParent(start)
-                explored.append(child.state)
+                explored.add(child.toString())
                 return child,explored,max(search_depth,child.level)
             children.append(child)
         if (row+1) <= 2 :
@@ -57,22 +60,24 @@ def DFS(start:state,goal:state,display=False):
             child.state[zero],child.state[zero+3] = child.state[zero+3],child.state[zero]
             if goal.state == child.state :
                 child.setParent(start)
-                explored.append(child.state)
+                explored.add(child.toString())
                 return child,explored,max(search_depth,child.level)
             children.append(child)
 
-        frontiers = [c.state for c in qu]
+        
         # kol wa7da minhom hanetcheck enha makanetsh fel frontier list abl kida we ba3dein hanenque it 
         for child in children:
-            if not (child.state in explored) and not (child.state in frontiers):
+            childS = child.toString()
+            if not (childS in explored) and not (childS in frontiers):
+                frontiers.add(child.toString())
                 child.setParent(start)
                 qu.append(child)
     if not flag:
         print("solution not Found")
 
 def DFS_interface(start,goal): # returns a np array of states
-    start = state(start.tolist())
-    goal = state(goal.tolist())
+    start = state(start)
+    goal = state(goal)
     child,explored,search_depth = DFS(start,goal)
     list_of_states = listofState(child)
     return np.array(list_of_states),len(list_of_states),child,start,explored,search_depth
